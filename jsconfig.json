@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "strictNullChecks": false,
+    "target": "ES2020",
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {}
+  },
+  "include": [
+    "core.js",
+    "utils.js",
+    "expenses.js",
+    "packing.js",
+    "weather.js",
+    "share.js",
+    "data.js",
+    "theme.js",
+    "trip-data.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "app.js",
+    "sw.js"
+  ]
+}
