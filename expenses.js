@@ -2,6 +2,7 @@
 
 import { escapeHTML, formatDate, showValidationError, clearValidationError, safeSetItem } from './utils.js';
 import { registerActions } from './actions.js';
+import { generateUUIDv4, validateEntropy } from './secure-random.js';
 
 /**
  * @typedef {Object} ExpenseCategory
@@ -186,9 +187,15 @@ export function getDayBudgetStatus(date, segmentId) {
 }
 
 function addExpense(date, amount, currency, category, note) {
+  try {
+    validateEntropy();
+  } catch (e) {
+    throw new Error('Cannot generate secure expense ID: ' + e.message);
+  }
+  
   const expenses = getExpenses();
   expenses.push({
-    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    id: generateUUIDv4(),
     date,
     amount: parseFloat(amount),
     currency,
