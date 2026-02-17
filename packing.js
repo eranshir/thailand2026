@@ -177,15 +177,9 @@ export function setPackingVisible(val) {
   showPacking = val;
 }
 
-// --- Action registrations ---
+import { subscribe, publish } from './event-bus.js';
 
-/**
- * Initializes window-level event bindings for the packing checklist.
- * @param {() => () => void} getRenderDay - Getter returning the renderDay function
- * @param {() => () => void} getRenderHeader - Getter returning the renderHeader function
- * @returns {void}
- */
-export function initPackingBindings(getRenderDay, getRenderHeader) {
+export function initPackingModule() {
   registerActions({
     togglePackingItem: ({ category, item }) => {
       const state = loadPackingState();
@@ -230,11 +224,11 @@ export function initPackingBindings(getRenderDay, getRenderHeader) {
 
     togglePackingView: () => {
       showPacking = !showPacking;
-      getRenderHeader()();
+      publish('renderRequested', { type: 'header' });
       if (showPacking) {
         renderPackingChecklist();
       } else {
-        getRenderDay()();
+        publish('renderRequested', { type: 'day' });
       }
     },
   });

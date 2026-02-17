@@ -5,11 +5,12 @@ import { formatDate } from './utils.js';
 import { getActivitiesForDay, initDragAndDrop, OVERRIDES_KEY } from './drag.js';
 import { registerActions } from './actions.js';
 import { initTheme, toggleTheme, getThemeIcon } from './theme.js';
-import { initShareBindings } from './share.js';
-import { renderExpensePanel, getDayBudgetStatus, initExpenseBindings, resetExpensePanel } from './expenses.js';
-import { getPackingStats, updatePackingBadge, renderPackingChecklist, isPackingVisible, setPackingVisible, initPackingBindings } from './packing.js';
-import { renderWeatherWidget, fetchAllWeather, initWeatherBindings } from './weather.js';
-import { initDataBindings } from './data.js';
+import { subscribe, publish } from './event-bus.js';
+import { renderExpensePanel, getDayBudgetStatus, resetExpensePanel, initExpenseModule } from './expenses.js';
+import { getPackingStats, updatePackingBadge, renderPackingChecklist, isPackingVisible, setPackingVisible, initPackingModule } from './packing.js';
+import { renderWeatherWidget, initWeatherModule } from './weather.js';
+import { initDataModule } from './data.js';
+import { initShareModule } from './share.js';
 
 // === Service Worker ===
 if ('serviceWorker' in navigator) {
@@ -270,19 +271,22 @@ function renderDay() {
   const main = document.getElementById('main');
   const day = days[currentIndex];
 
-  // Expense panel
   const expenseHtml = renderExpensePanel(day.date, day.segment, getCtx());
   const dayCard = main.querySelector('.day-card');
   if (dayCard) dayCard.insertAdjacentHTML('beforeend', expenseHtml);
 
-  // Weather widget
   if (dayCard) {
     const banner = dayCard.querySelector('.day-banner');
     if (banner) banner.insertAdjacentHTML('afterend', renderWeatherWidget(day.date, day.segment));
   }
 
   updatePackingBadge();
-  initDragAndDrop(() => { renderHeader(); renderDay(); });
+  publish('contextUpdated', getCtx());
+  initDragAndDrop(() => {
+    renderHeader();
+    renderDay();
+    publish('stateChanged', { currentIndex });
+  });
 }
 
 /**
@@ -435,6 +439,7 @@ function selectDay(index) {
   setPackingVisible(false);
   renderHeader();
   renderDay();
+  publish('stateChanged', { currentIndex });
 }
 
 // Register core actions
@@ -505,22 +510,27 @@ document.addEventListener('keydown', function (e) {
 });
 
 // === Init Bindings ===
-// Use getter functions so modules can call renderDay/renderHeader without circular imports
-const getRenderDay = () => renderDay;
-const getRenderHeader = () => renderHeader;
-const getSelectDay = () => selectDay;
+subscribe('renderRequested', ({ type }) => {
+  if (type === 'header' || type === 'both') {
+    renderHeader();
+  }
+  if (type === 'day' || type === 'both') {
+    renderDay();
+  }
+});
 
 initTheme();
-initShareBindings(getCtx);
-initExpenseBindings(getRenderDay, getRenderHeader, getSelectDay);
-initPackingBindings(getRenderDay, getRenderHeader);
-initWeatherBindings(getRenderDay);
-initDataBindings(getRenderDay, getRenderHeader);
+initExpenseModule();
+initPackingModule();
+initWeatherModule();
+initDataModule();
+initShareModule();
 
 // === Init Render ===
 renderHeader();
 renderDay();
-fetchAllWeather(false, renderDay);
+publish('contextUpdated', getCtx());
+publish('appInitialized', {});
 
 // Update countdown every minute, pause when tab is hidden
 let countdownInterval = null;

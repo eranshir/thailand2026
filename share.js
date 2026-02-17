@@ -150,15 +150,18 @@ async function copyToClipboardInner(days) {
   }
 }
 
-/**
- * Initializes window-level event bindings for share/export functionality.
- * @param {() => import('./expenses.js').CoreContext} getCtx - Getter returning the core context
- * @returns {void}
- */
-export function initShareBindings(getCtx) {
+import { subscribe, publish } from './event-bus.js';
+
+let coreContext = null;
+
+export function initShareModule() {
+  subscribe('contextUpdated', (ctx) => {
+    coreContext = ctx;
+  });
+
   registerActions({
     shareTrip: async () => {
-      const { days, segmentColors, segmentNames } = getCtx();
+      const { days, segmentColors, segmentNames } = coreContext;
       const shareText = generateShareText(days);
 
       if (navigator.share) {
@@ -177,7 +180,7 @@ export function initShareBindings(getCtx) {
     },
 
     copyToClipboard: async () => {
-      const { days } = getCtx();
+      const { days } = coreContext;
       await copyToClipboardInner(days);
     },
   });

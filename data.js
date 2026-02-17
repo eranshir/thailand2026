@@ -27,7 +27,21 @@ function exportData() {
   showShareToast('הגיבוי הורד בהצלחה!');
 }
 
-function importData(getRenderDay, getRenderHeader) {
+import { subscribe, publish } from './event-bus.js';
+
+let dataMenuOpen = false;
+
+function updateStorageBar() {
+  const bar = document.getElementById('storageUsageBar');
+  const text = document.getElementById('storageUsageText');
+  if (!bar || !text) return;
+  const usage = getStorageUsage();
+  bar.style.width = Math.min(usage.percent, 100) + '%';
+  bar.style.background = usage.percent > 80 ? '#E53935' : usage.percent > 60 ? '#F9A825' : '#43A047';
+  text.textContent = `${usage.usedFormatted} / ${usage.totalFormatted} (${usage.percent}%)`;
+}
+
+function importData() {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.json,application/json';
@@ -59,8 +73,7 @@ function importData(getRenderDay, getRenderHeader) {
         }
 
         initTheme();
-        getRenderHeader()();
-        getRenderDay()();
+        publish('renderRequested', { type: 'both' });
         showShareToast(`יובאו ${imported} פריטי נתונים!`);
       } catch {
         showShareToast('שגיאה בקריאת הקובץ');
@@ -71,43 +84,17 @@ function importData(getRenderDay, getRenderHeader) {
   input.click();
 }
 
-let dataMenuOpen = false;
-
-function updateStorageBar() {
-  const bar = document.getElementById('storageUsageBar');
-  const text = document.getElementById('storageUsageText');
-  if (!bar || !text) return;
-  const usage = getStorageUsage();
-  bar.style.width = Math.min(usage.percent, 100) + '%';
-  bar.style.background = usage.percent > 80 ? '#E53935' : usage.percent > 60 ? '#F9A825' : '#43A047';
-  text.textContent = `${usage.usedFormatted} / ${usage.totalFormatted} (${usage.percent}%)`;
-}
-
-function toggleDataMenu() {
-  dataMenuOpen = !dataMenuOpen;
-  const menu = document.getElementById('dataMenu');
-  if (menu) {
-    menu.classList.toggle('visible', dataMenuOpen);
-    if (dataMenuOpen) updateStorageBar();
-  }
-}
-
-/**
- * Initializes window-level event bindings for data export/import.
- * @param {() => () => void} getRenderDay - Getter returning the renderDay function
- * @param {() => () => void} getRenderHeader - Getter returning the renderHeader function
- * @returns {void}
- */
-export function initDataBindings(getRenderDay, getRenderHeader) {
+export function initDataModule() {
   registerActions({
     exportData: () => exportData(),
-    importData: () => importData(getRenderDay, getRenderHeader),
+    importData: () => importData(),
     toggleDataMenu: (_args, event) => {
       event.stopPropagation();
       dataMenuOpen = !dataMenuOpen;
       const menu = document.getElementById('dataMenu');
       if (menu) {
         menu.classList.toggle('visible', dataMenuOpen);
+        if (dataMenuOpen) updateStorageBar();
       }
     },
   });
