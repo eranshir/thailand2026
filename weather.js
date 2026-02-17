@@ -138,15 +138,20 @@ export function renderWeatherWidget(date, segment) {
   return h;
 }
 
-/**
- * Initializes window-level event bindings for weather refresh.
- * @param {() => () => void} getRenderDay - Getter returning the renderDay function
- * @returns {void}
- */
-export function initWeatherBindings(getRenderDay) {
+import { subscribe, publish } from './event-bus.js';
+
+export function initWeatherModule() {
+  subscribe('appInitialized', () => {
+    fetchAllWeather(false, () => {
+      publish('renderRequested', { type: 'day' });
+    });
+  });
+
   registerActions({
     refreshWeather: () => {
-      fetchAllWeather(true, () => getRenderDay()());
+      fetchAllWeather(true, () => {
+        publish('renderRequested', { type: 'day' });
+      });
       showShareToast('מעדכן מזג אוויר...');
     },
   });

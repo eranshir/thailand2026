@@ -452,25 +452,22 @@ function renderBudgetEditor() {
   return html;
 }
 
-// --- Action registrations (called with renderDay/renderHeader callbacks) ---
+import { subscribe, publish } from './event-bus.js';
 
-/**
- * Initializes window-level event bindings for the expense tracker.
- * @param {() => () => void} getRenderDay - Getter returning the renderDay function
- * @param {() => () => void} getRenderHeader - Getter returning the renderHeader function
- * @param {() => () => void} getSelectDay - Getter returning the selectDay function
- * @returns {void}
- */
-export function initExpenseBindings(getRenderDay, getRenderHeader, getSelectDay) {
+export function initExpenseModule() {
+  subscribe('stateChanged', () => {
+    resetExpensePanel();
+  });
+
   registerActions({
     toggleExpensePanel: () => {
       expensePanelOpen = !expensePanelOpen;
-      getRenderDay()();
+      publish('renderRequested', { type: 'day' });
     },
 
     toggleRatesEditor: () => {
       ratesEditorOpen = !ratesEditorOpen;
-      getRenderDay()();
+      publish('renderRequested', { type: 'day' });
     },
 
     addExpenseFromForm: ({ date }) => {
@@ -493,12 +490,12 @@ export function initExpenseBindings(getRenderDay, getRenderHeader, getSelectDay)
       }
 
       addExpense(date, amount, currency, category, note);
-      getRenderDay()();
+      publish('renderRequested', { type: 'day' });
     },
 
     deleteExpenseItem: ({ id }) => {
       deleteExpense(id);
-      getRenderDay()();
+      publish('renderRequested', { type: 'day' });
     },
 
     updateRate: (_args, _event, el) => {
@@ -519,24 +516,24 @@ export function initExpenseBindings(getRenderDay, getRenderHeader, getSelectDay)
       const rates = getExchangeRates();
       rates[currency] = parsed;
       saveExchangeRates(rates);
-      getRenderDay()();
+      publish('renderRequested', { type: 'day' });
     },
 
     resetRates: () => {
       localStorage.removeItem('expense_rates');
-      getRenderDay()();
+      publish('renderRequested', { type: 'day' });
     },
 
     toggleSpendingSummary: () => {
       spendingSummaryOpen = !spendingSummaryOpen;
       if (spendingSummaryOpen) budgetEditorOpen = false;
-      getRenderDay()();
+      publish('renderRequested', { type: 'day' });
     },
 
     toggleBudgetEditor: () => {
       budgetEditorOpen = !budgetEditorOpen;
       if (budgetEditorOpen) spendingSummaryOpen = false;
-      getRenderDay()();
+      publish('renderRequested', { type: 'day' });
     },
 
     updateDailyBudget: (_args, _event, el) => {
@@ -545,8 +542,7 @@ export function initExpenseBindings(getRenderDay, getRenderHeader, getSelectDay)
       const config = getBudgetConfig();
       config.daily = parsed;
       saveBudgetConfig(config);
-      getRenderDay()();
-      getRenderHeader()();
+      publish('renderRequested', { type: 'both' });
     },
 
     updateSegmentBudget: (_args, _event, el) => {
@@ -560,8 +556,7 @@ export function initExpenseBindings(getRenderDay, getRenderHeader, getSelectDay)
         config.segments[segmentId] = parsed;
       }
       saveBudgetConfig(config);
-      getRenderDay()();
-      getRenderHeader()();
+      publish('renderRequested', { type: 'both' });
     },
   });
 }
