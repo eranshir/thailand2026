@@ -1,4 +1,4 @@
-const CACHE_VERSION = '2026021901'; // Update on each deploy
+const CACHE_VERSION = '2026021902'; // Update on each deploy
 const CACHE_NAME = 'thailand-trip-v' + CACHE_VERSION;
 
 const ASSETS = [
