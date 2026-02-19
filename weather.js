@@ -53,7 +53,13 @@ function isWeatherStale() {
 }
 
 async function fetchWeatherForLocation(lat, lon) {
-  const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,relative_humidity_2m_mean,precipitation_probability_max,weathercode&timezone=auto&start_date=2026-02-20&end_date=2026-03-07`);
+  // Use current date range: from today up to 16 days ahead (Open-Meteo max forecast range)
+  const today = new Date();
+  const start = new Date(Math.max(today.getTime(), new Date('2026-02-20').getTime()));
+  const end = new Date('2026-03-07');
+  const startStr = start.toISOString().split('T')[0];
+  const endStr = end.toISOString().split('T')[0];
+  const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code&timezone=auto&start_date=${startStr}&end_date=${endStr}`);
   if (!r.ok) throw new Error('Weather fetch failed');
   return r.json();
 }
@@ -80,13 +86,14 @@ export async function fetchAllWeather(force, onUpdate) {
     for (const [sid, loc] of Object.entries(WEATHER_LOCATIONS)) {
       const data = fetched[loc.lat + ',' + loc.lon];
       if (!data || !data.daily) continue;
+      const weatherCodes = data.daily.weather_code || data.daily.weathercode || [];
       data.daily.time.forEach((d, i) => {
         cache[sid + '_' + d] = {
           tempMax: Math.round(data.daily.temperature_2m_max[i]),
           tempMin: Math.round(data.daily.temperature_2m_min[i]),
-          humidity: Math.round(data.daily.relative_humidity_2m_mean[i]),
-          rainProb: data.daily.precipitation_probability_max[i],
-          code: data.daily.weathercode[i],
+          humidity: 0,
+          rainProb: data.daily.precipitation_probability_max[i] || 0,
+          code: weatherCodes[i] || 0,
         };
       });
     }
@@ -129,7 +136,7 @@ export function renderWeatherWidget(date, segment) {
   const loc = WEATHER_LOCATIONS[segment];
   let h = `<div class="weather-widget"><div class="weather-header"><span class="weather-title">🌤️ מזג אוויר — ${loc ? loc.name : ''}</span><button class="weather-refresh-btn" data-action="refreshWeather" title="רענן">↻</button></div>`;
   if (w) {
-    h += `<div class="weather-data"><div class="weather-temp"><span class="weather-icon">${weatherCodeToIcon(w.code)}</span><span class="weather-temp-range">${w.tempMin}°–${w.tempMax}°C</span></div><div class="weather-detail"><span>💧 ${w.humidity}%</span><span>🌧️ ${w.rainProb}%</span></div></div>`;
+    h += `<div class="weather-data"><div class="weather-temp"><span class="weather-icon">${weatherCodeToIcon(w.code)}</span><span class="weather-temp-range">${w.tempMin}\u00B0\u2013${w.tempMax}\u00B0C</span></div><div class="weather-detail"><span>\uD83C\uDF27\uFE0F \u05D2\u05E9\u05DD ${w.rainProb}%</span></div></div>`;
   } else {
     h += `<div class="weather-no-data">אין נתונים — לחצו ↻ לרענן</div>`;
   }

@@ -1,4 +1,4 @@
-const CACHE_VERSION = '2026021405'; // Update on each deploy
+const CACHE_VERSION = '2026021901'; // Update on each deploy
 const CACHE_NAME = 'thailand-trip-v' + CACHE_VERSION;
 
 const ASSETS = [
@@ -12,8 +12,12 @@ const ASSETS = [
   './expenses.js',
   './packing.js',
   './weather.js',
+  './flights.js',
   './data.js',
   './actions.js',
+  './drag.js',
+  './event-bus.js',
+  './secure-random.js',
   './trip-data.js',
   './manifest.json',
   './icons/icon-192.png',

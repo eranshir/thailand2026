@@ -8,6 +8,7 @@
  * @property {string} [toName] - Arrival city name
  * @property {string} toTime - Arrival time (HH:MM or "TBD")
  * @property {string} [note] - Additional flight notes
+ * @property {string} [flightNumber] - IATA flight number (e.g. "EY598")
  */
 
 /**
@@ -112,8 +113,8 @@ const TRIP_DATA = {
       segment: "phuket-arrival",
       label: "הגעה לפוקט",
       flights: [
-        { airline: "Etihad", from: "TLV", fromName: "תל אביב", fromTime: "00:55", to: "AUH", toName: "אבו דאבי", toTime: "05:50" },
-        { airline: "Etihad", from: "AUH", fromName: "אבו דאבי", fromTime: "08:40", to: "HKT", toName: "פוקט", toTime: "17:55" },
+        { airline: "Etihad", flightNumber: "EY598", from: "TLV", fromName: "תל אביב", fromTime: "00:55", to: "AUH", toName: "אבו דאבי", toTime: "05:50" },
+        { airline: "Etihad", flightNumber: "EY474", from: "AUH", fromName: "אבו דאבי", fromTime: "08:40", to: "HKT", toName: "פוקט", toTime: "17:55" },
       ],
       hotel: {
         name: "Sugar Marina Hotel - AVIATOR",
@@ -407,8 +408,8 @@ const TRIP_DATA = {
       segment: "phuket-return",
       label: "יום טיסות חזרה",
       flights: [
-        { airline: "Etihad", from: "HKT", fromName: "פוקט", fromTime: "03:10", to: "AUH", toName: "אבו דאבי", toTime: "06:45" },
-        { airline: "Etihad", from: "AUH", fromName: "אבו דאבי", fromTime: "08:40", to: "TLV", toName: "תל אביב", toTime: "10:35" },
+        { airline: "Etihad", flightNumber: "EY475", from: "HKT", fromName: "פוקט", fromTime: "03:10", to: "AUH", toName: "אבו דאבי", toTime: "06:45" },
+        { airline: "Etihad", flightNumber: "EY597", from: "AUH", fromName: "אבו דאבי", fromTime: "08:40", to: "TLV", toName: "תל אביב", toTime: "10:35" },
       ],
       hotel: null,
       activities: [

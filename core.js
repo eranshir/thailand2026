@@ -11,6 +11,7 @@ import { getPackingStats, updatePackingBadge, renderPackingChecklist, isPackingV
 import { renderWeatherWidget, initWeatherModule } from './weather.js';
 import { initDataModule } from './data.js';
 import { initShareModule } from './share.js';
+import { clearFlightRegistry, registerFlight, initFlightModule } from './flights.js';
 
 // === Service Worker ===
 if ('serviceWorker' in navigator) {
@@ -236,8 +237,12 @@ function renderDayBase() {
 
   html += renderSummaryChips(day);
 
+  clearFlightRegistry();
   if (day.flights && day.flights.length > 0) {
-    day.flights.forEach(f => { html += renderFlight(f); });
+    day.flights.forEach(f => {
+      const idx = registerFlight(f, day.date);
+      html += renderFlight(f, idx);
+    });
   }
 
   if (day.hotel) {
@@ -312,12 +317,14 @@ function renderSummaryChips(day) {
 /**
  * Renders a single flight card.
  * @param {import('./trip-data.js').Flight} f - Flight data
+ * @param {number} idx - Registry index for click handling
  * @returns {string} HTML string for the flight card
  */
-function renderFlight(f) {
+function renderFlight(f, idx) {
+  const fnLabel = f.flightNumber && f.flightNumber !== 'TBD' ? ` | ${f.flightNumber}` : '';
   return `
-    <div class="flight-card">
-      <div class="flight-header">✈️ ${f.airline || 'טיסה'}</div>
+    <div class="flight-card flight-card-clickable" data-action="openFlightDetail" data-flight-idx="${idx}">
+      <div class="flight-header">✈️ ${f.airline || 'טיסה'}${fnLabel}<span class="flight-tap-hint">לחצו לפרטים</span></div>
       <div class="flight-route">
         <div class="flight-point">
           <div class="flight-code">${f.from}</div>
@@ -525,6 +532,7 @@ initPackingModule();
 initWeatherModule();
 initDataModule();
 initShareModule();
+initFlightModule();
 
 // === Init Render ===
 renderHeader();
