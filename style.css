@@ -614,6 +614,83 @@ body {
   margin-top: 0;
 }
 
+/* === Activity Delete Button === */
+.activity-delete-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-light);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  opacity: 0.5;
+  transition: opacity 0.15s, background 0.15s;
+  line-height: 1;
+}
+
+.activity-delete-btn:hover {
+  opacity: 1;
+  background: rgba(229, 57, 53, 0.1);
+  color: #E53935;
+}
+
+/* === Activity Add Form === */
+.activity-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0,0,0,0.1);
+}
+
+.activity-form-row {
+  display: flex;
+  gap: 6px;
+}
+
+.activity-icon-input {
+  width: 48px;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 1rem;
+  padding: 6px 4px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.activity-title-input,
+.activity-note-input {
+  flex: 1;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+}
+
+.activity-add-btn {
+  align-self: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.82rem;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.activity-add-btn:hover {
+  background: var(--border);
+}
+
 /* === Transition Day Pill (split between two segments) === */
 .day-pill.transition {
   position: relative;
@@ -1741,6 +1818,10 @@ body {
 }
 
 [data-theme="dark"] .activity-section-header {
+  border-top-color: rgba(255,255,255,0.1);
+}
+
+[data-theme="dark"] .activity-add-form {
   border-top-color: rgba(255,255,255,0.1);
 }
 
