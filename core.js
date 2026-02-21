@@ -2,7 +2,7 @@
 // @ts-check
 
 import { formatDate } from './utils.js';
-import { getActivitiesForDay, initDragAndDrop, OVERRIDES_KEY } from './drag.js';
+import { getActivitiesForDay, initDragAndDrop, OVERRIDES_KEY, addActivity, deleteActivity } from './drag.js';
 import { registerActions } from './actions.js';
 import { initTheme, toggleTheme, getThemeIcon } from './theme.js';
 import { subscribe, publish } from './event-bus.js';
@@ -250,9 +250,7 @@ function renderDayBase() {
   }
 
   const activities = getActivitiesForDay(day.date);
-  if (activities.length > 0) {
-    html += renderActivities(activities);
-  }
+  html += renderActivities(activities, day.date);
 
   if (day.notes && day.notes.length > 0) {
     html += renderNotes(day.notes);
@@ -370,15 +368,16 @@ function renderHotel(h) {
 }
 
 /**
- * Renders the activities section with map links.
+ * Renders the activities section with map links, delete buttons, and add form.
  * @param {import('./trip-data.js').Activity[]} activities - Array of activities
+ * @param {string} date - Date string (YYYY-MM-DD) for add/delete actions
  * @returns {string} HTML string for the activities section
  */
-function renderActivities(activities) {
+function renderActivities(activities, date) {
   let html = `<div class="activities-section">
     <div class="activities-title">פעילויות</div>`;
 
-  activities.forEach(a => {
+  activities.forEach((a, i) => {
     if (a.section) {
       html += `<div class="activity-section-header">${a.section}</div>`;
     }
@@ -397,9 +396,21 @@ function renderActivities(activities) {
           ${a.note ? `<div class="activity-note">${a.note}</div>` : ''}
         </div>
         ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" rel="noopener" class="activity-map-link" title="נווט ב-Google Maps">📍</a>` : ''}
+        <button class="activity-delete-btn" data-action="deleteActivityItem" data-date="${date}" data-index="${i}" title="מחק פעילות">✕</button>
       </div>
     `;
   });
+
+  html += `
+    <div class="activity-add-form">
+      <div class="activity-form-row">
+        <input type="text" id="activityIcon" placeholder="📍" class="activity-icon-input" maxlength="4" />
+        <input type="text" id="activityTitle" placeholder="הוסף פעילות..." class="activity-title-input" />
+      </div>
+      <input type="text" id="activityNote" placeholder="הערה (אופציונלי)" class="activity-note-input" />
+      <button class="activity-add-btn" data-action="addActivityItem" data-date="${date}">+ הוסף</button>
+    </div>
+  `;
 
   html += `</div>`;
   return html;
@@ -455,6 +466,26 @@ registerActions({
   toggleThemeAndRerender: ({ index }) => {
     toggleTheme();
     selectDay(parseInt(index, 10));
+  },
+  addActivityItem: ({ date }) => {
+    const titleEl = document.getElementById('activityTitle');
+    const iconEl = document.getElementById('activityIcon');
+    const noteEl = document.getElementById('activityNote');
+    const title = titleEl?.value?.trim();
+    if (!title) return;
+    const icon = iconEl?.value?.trim() || '📍';
+    const note = noteEl?.value?.trim() || '';
+    addActivity(date, { title, icon, note });
+    if (titleEl) titleEl.value = '';
+    if (iconEl) iconEl.value = '';
+    if (noteEl) noteEl.value = '';
+    renderHeader();
+    renderDay();
+  },
+  deleteActivityItem: ({ date, index }) => {
+    deleteActivity(date, parseInt(index, 10));
+    renderHeader();
+    renderDay();
   },
 });
 

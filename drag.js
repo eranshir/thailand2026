@@ -29,12 +29,41 @@ export function getActivitiesForDay(date) {
     const day = TRIP_DATA.days.find(d => d.date === date);
     return day ? (day.activities || []) : [];
   }
-  // Resolve references back to original TRIP_DATA activities
+  // Resolve references back to original TRIP_DATA activities (or return custom activity data)
   return overrides[date].map(ref => {
+    if (ref.custom) return ref.data;
     const srcDay = TRIP_DATA.days.find(d => d.date === ref.originalDay);
     if (!srcDay || !srcDay.activities || !srcDay.activities[ref.index]) return null;
     return srcDay.activities[ref.index];
   }).filter(Boolean);
+}
+
+/**
+ * Add a custom activity to a day.
+ * @param {string} date - YYYY-MM-DD
+ * @param {import('./trip-data.js').Activity} activityData - Activity object
+ */
+export function addActivity(date, activityData) {
+  const overrides = loadOverrides();
+  if (!overrides[date]) {
+    overrides[date] = buildDefaultRefs(date);
+  }
+  overrides[date].push({ custom: true, data: activityData });
+  saveOverrides(overrides);
+}
+
+/**
+ * Delete an activity from a day by index.
+ * @param {string} date - YYYY-MM-DD
+ * @param {number} index - Index of the activity to remove
+ */
+export function deleteActivity(date, index) {
+  const overrides = loadOverrides();
+  if (!overrides[date]) {
+    overrides[date] = buildDefaultRefs(date);
+  }
+  overrides[date].splice(index, 1);
+  saveOverrides(overrides);
 }
 
 /**

@@ -62,11 +62,12 @@ export const EXPENSE_CATEGORIES = [
 export const CURRENCIES = [
   { id: 'THB', label: '฿ THB', symbol: '฿' },
   { id: 'SGD', label: '$ SGD', symbol: 'S$' },
+  { id: 'USD', label: '$ USD', symbol: '$' },
   { id: 'ILS', label: '₪ ILS', symbol: '₪' },
 ];
 
-const DEFAULT_RATES = { THB: 0.1, SGD: 2.75, ILS: 1 };
-const DEFAULT_DAILY_BUDGET = 500;
+const DEFAULT_RATES = { THB: 0.1, SGD: 2.75, USD: 3.7, ILS: 1 };
+const DEFAULT_DAILY_BUDGET = 5000;
 
 // --- Storage helpers ---
 
@@ -320,7 +321,7 @@ export function renderExpensePanel(date, segmentId, ctx) {
 
     if (ratesEditorOpen) {
       html += `<div class="expense-rates-form">`;
-      ['THB', 'SGD'].forEach(cur => {
+      ['THB', 'SGD', 'USD'].forEach(cur => {
         html += `<div class="expense-rate-row">
           <span>1 ${cur} =</span>
           <input type="number" step="0.01" value="${rates[cur]}" class="expense-input expense-rate-input" data-action="updateRate" data-currency="${cur}" />
