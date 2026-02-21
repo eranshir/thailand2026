@@ -66,7 +66,7 @@ export const CURRENCIES = [
   { id: 'ILS', label: '₪ ILS', symbol: '₪' },
 ];
 
-const DEFAULT_RATES = { THB: 0.1, SGD: 2.75, USD: 3.7, ILS: 1 };
+const DEFAULT_RATES = { THB: 0.1, SGD: 2.75, USD: 3.1, ILS: 1 };
 const DEFAULT_DAILY_BUDGET = 5000;
 
 // --- Storage helpers ---
